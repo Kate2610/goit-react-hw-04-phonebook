@@ -1,64 +1,68 @@
 import style from './ContactForm.module.css';
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-  };
+const ContactForm = ({ onSubmitData }) => {
+const [name, setName] = useState('');
+const [number, setNumber] = useState('');
 
-  handleChange = event => {
-    const { name, value } = event.currentTarget;
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = event => {
-    event.preventDefault();
-    let contactForAdd = { name: this.state.name, number: this.state.number };
-    this.props.onSubmitData(contactForAdd);
-    this.reset();
-  };
-
-  reset = () => {
-    this.setState({ name: '', number: '' });
-  };
-
-  render() {
-    return (
-      <div className={style.contactform}>
-        <form type="submit" onSubmit={this.handleSubmit}>
-          <label>
-            Name
-            <input
-              type="text"
-              name="name"
-              
-              required
-              onChange={this.handleChange}
-              value={this.state.name}
-            />
-          </label>
-          <label>
-            Number
-            <input
-              type="tel"
-              name="number"
-             
-              required
-              onChange={this.handleChange}
-              value={this.state.number}
-            />
-          </label>
-
-          <button type="submit">Add contact</button>
-        </form>
-      </div>
-    );
-  }
+const handleChange = event => {
+const { name, value } = event.currentTarget;
+if (name === 'name') {
+setName(value);
+} else if (name === 'number') {
+setNumber(value);
 }
+};
+
+const handleSubmit = event => {
+event.preventDefault();
+let contactForAdd = { name, number };
+onSubmitData(contactForAdd);
+reset();
+};
+
+const reset = () => {
+setName('');
+setNumber('');
+};
+
+return (
+<div className={style.contactform}>
+<form type="submit" onSubmit={handleSubmit}>
+<label>
+Name
+<input
+         type="text"
+         name="name"
+         required
+         onChange={handleChange}
+         value={name}
+       />
+</label>
+<label>
+Number
+<input
+         type="tel"
+         name="number"
+         required
+         onChange={handleChange}
+         value={number}
+       />
+</label>
+<button type="submit">Add contact</button>
+  </form>
+</div>
+);
+};
 
 ContactForm.propTypes = {
-  onSubmitData: PropTypes.func.isRequired,
+onSubmitData: PropTypes.func.isRequired,
 };
+
 export default ContactForm;
+
+
+
+
+

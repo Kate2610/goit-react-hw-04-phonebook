@@ -1,93 +1,70 @@
-import React, { Component } from "react";
-
+import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ContactForm from "./ContactForm/ContactForm";
 import ContactList from "./ContactList/ContactList";
 import Filter from "./Filter/Filter";
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
-      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
-      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
-      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
-    ],
-    filter: "",
+function App() {
+  const [contacts, setContacts] = useState([
+    { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
+    { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
+    { id: "id-3", name: "Eden Clements", number: "645-17-79" },
+    { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
+  ]);
+  const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    const contactsFromLocalStorage = localStorage.getItem("contacts");
+    if (contactsFromLocalStorage) {
+      setContacts(JSON.parse(contactsFromLocalStorage));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
+
+  const formSubmitHandler = (data) => {
+    repeatControl(data);
   };
 
-  componentDidMount() {
-    const contacts = localStorage.getItem("contacts");
-    const parsedContacts = JSON.parse(contacts);
- 
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-  
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    }
-  }
-
-  formSubmitHandler = (data) => {
-    this.repeatControl(data);
-  };
-
-  repeatControl = (data) => {
-    let nameArray = [];
-    nameArray = this.state.contacts.map((cur) => cur.name.toLowerCase());
+  const repeatControl = (data) => {
+    const nameArray = contacts.map((cur) => cur.name.toLowerCase());
     if (!nameArray.includes(data.name.toLowerCase())) {
-      let arrayCont = [];
-      arrayCont = [
-        ...this.state.contacts,
+      const newContacts = [
+        ...contacts,
         { id: uuidv4(), name: data.name, number: data.number },
       ];
-      return this.setState({ ...this.state, contacts: arrayCont });
+      setContacts(newContacts);
     } else {
-      alert(" Контакт вже є у телефонній книзі");
+      alert("A contact with the same name already exists");
     }
   };
 
-  elementDelete = (arr, idContact) => {
-    let newArr = arr.filter((elem) => elem.id !== idContact);
-    return newArr;
+  const deleteContactFromContactList = (idContact) => {
+    const newArrAfterDel = contacts.filter((elem) => elem.id !== idContact);
+    setContacts(newArrAfterDel);
   };
 
-  deleteContactFromContactList = (idContact) => {
-    let newArrAfterDel = this.elementDelete(this.state.contacts, idContact);
-    this.setState({
-      ...this.state,
-      contacts: [...newArrAfterDel],
-    });
-  };
-
-  setFilterToState = (filterData) => {
-    this.setState({ ...this.state, filter: `${filterData}` });
-  };
-
-  filterArr = (fArr) => {
-    let newArr = fArr.filter((cur) =>
-      cur.name.toUpperCase().includes(this.state.filter)
+  const filterArr = () => {
+    const filteredContacts = contacts.filter((cur) =>
+      cur.name.toUpperCase().includes(filter.toUpperCase())
     );
-    return newArr;
+    return filteredContacts;
   };
 
-  render() {
-    return (
-      <div className="App">
-        <h1>Phonebook</h1>
-        <ContactForm onSubmitData={this.formSubmitHandler} />
-        <h1>Contacts</h1>
-        <Filter setFilterToState={this.setFilterToState} />
-        <ContactList
-          contacts={this.filterArr(this.state.contacts)}
-          del={this.deleteContactFromContactList}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <h1>Phonebook</h1>
+      <ContactForm onSubmitData={formSubmitHandler} />
+      <h1>Contacts</h1>
+      <Filter setFilterToState={setFilter} />
+      <ContactList
+        contacts={filterArr()}
+        del={deleteContactFromContactList}
+      />
+    </div>
+  );
 }
+
 export default App;
